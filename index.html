@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>ATLAZ — DJ</title>
+    <meta name="description" content="ATLAZ — bold electronic music, live sets, and bookings." />
+    <link rel="icon" href="scr/img/atlazmusicbeLOGO.png" />
+    <link rel="preload" as="image" href="scr/img/atlazmusicbeLOGO.png" />
+    <!-- Optional modern font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="no-scroll">
+    <!-- First-visit preloader overlay -->
+    <div id="preloader" role="dialog" aria-label="Loading ATLAZ" aria-live="polite" aria-hidden="false">
+      <div class="preloader-inner">
+        <img class="preloader-logo" src="scr/img/atlazmusicbeLOGO.png" alt="ATLAZ logo" />
+        <div class="progress" aria-hidden="false" aria-label="Loading progress">
+          <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+        </div>
+        <p class="progress-text" id="progress-text">0%</p>
+      </div>
+    </div>
+
+    <!-- Glassy navbar (appears on scroll) -->
+    <header id="navbar" class="glass-nav" aria-hidden="true">
+      <nav class="nav">
+        <a class="brand" href="#home" aria-label="ATLAZ Home">
+          <img src="scr/img/atlazmusicbeLOGO.png" alt="ATLAZ" />
+        </a>
+        <ul class="links">
+          <li><a href="#about">About</a></li>
+          <li><a href="#music">Music</a></li>
+          <li><a href="#gigs">Gigs</a></li>
+          <li><a class="cta" href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="home">
+      <!-- Hero with centered logo -->
+      <section class="hero" aria-label="ATLAZ Hero">
+        <div class="hero-inner">
+          <img class="hero-logo" src="scr/img/atlazmusicbeLOGO.png" alt="ATLAZ logo" />
+          <h1 class="sr-only">ATLAZ</h1>
+          <p class="tagline">Bold electronic energy. Built for the night.</p>
+        </div>
+      </section>
+
+      <section id="about" class="section">
+        <div class="container">
+          <h2>About</h2>
+          <p>
+            ATLAZ blends heavy-hitting club rhythms with atmospheric synths
+            for a sound that hits hard and lingers. Expect sharp selections,
+            seamless transitions, and an unforgettable vibe.
+          </p>
+        </div>
+      </section>
+
+      <section id="music" class="section alt">
+        <div class="container">
+          <h2>Music</h2>
+          <div class="cards">
+            <article class="card">
+              <h3>Latest Mix</h3>
+              <p>60 minutes of peak-time techno and bass-driven heat.</p>
+              <a class="btn" href="#" aria-label="Play latest mix">Play</a>
+            </article>
+            <article class="card">
+              <h3>Studio Drops</h3>
+              <p>Original tracks and reworks — raw and ready.</p>
+              <a class="btn" href="#" aria-label="Listen to studio drops">Listen</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="gigs" class="section">
+        <div class="container">
+          <h2>Gigs</h2>
+          <ul class="list">
+            <li><strong>Oct 18</strong> — Warehouse 27, Antwerp</li>
+            <li><strong>Nov 02</strong> — Nightshift, Brussels</li>
+            <li><strong>Dec 14</strong> — Sublevel, Ghent</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="contact" class="section alt">
+        <div class="container">
+          <h2>Contact</h2>
+          <p>Bookings and inquiries:</p>
+          <a class="btn cta" href="mailto:bookings@atlazmusic.be">bookings@atlazmusic.be</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container small">
+        <p>© <span id="year"></span> ATLAZ. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <noscript>
+      <style>
+        /* Ensure the site is usable with JS disabled */
+        body.no-scroll { overflow: auto !important; }
+        #preloader { display: none !important; }
+        #navbar { opacity: 1 !important; transform: none !important; pointer-events: auto !important; }
+      </style>
+    </noscript>
+
+    <script src="script.js" type="module"></script>
+  </body>
+  </html>
