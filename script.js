@@ -5,6 +5,7 @@ const SELECTORS = {
   progressBar: '#progress-bar',
   progressText: '#progress-text',
   navbar: '#navbar',
+  topLinks: '#top-links',
 };
 
 const el = (sel) => document.querySelector(sel);
@@ -16,21 +17,46 @@ function setYear() {
 
 function showNavbarOnScroll() {
   const nav = el(SELECTORS.navbar);
+  const topl = el(SELECTORS.topLinks);
   if (!nav) return;
 
-  const onScroll = () => {
-    const scrolled = window.scrollY || document.documentElement.scrollTop;
-    if (scrolled > 40) {
-      nav.classList.add('visible');
-      nav.setAttribute('aria-hidden', 'false');
-    } else {
-      nav.classList.remove('visible');
-      nav.setAttribute('aria-hidden', 'true');
-    }
-  };
-
-  onScroll();
-  window.addEventListener('scroll', onScroll, { passive: true });
+  // If IntersectionObserver is supported, show navbar only when top-links are fully out of view
+  if ('IntersectionObserver' in window && topl) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const e = entries[0];
+        if (e.isIntersecting) {
+          // top links visible -> hide navbar
+          nav.classList.remove('visible');
+          nav.setAttribute('aria-hidden', 'true');
+          topl.classList.remove('hidden');
+        } else {
+          // top links gone -> show navbar
+          nav.classList.add('visible');
+          nav.setAttribute('aria-hidden', 'false');
+          topl.classList.add('hidden');
+        }
+      },
+      { root: null, threshold: 0 }
+    );
+    observer.observe(topl);
+  } else {
+    // Fallback to simple scroll position
+    const onScroll = () => {
+      const scrolled = window.scrollY || document.documentElement.scrollTop;
+      if (scrolled > 40) {
+        nav.classList.add('visible');
+        nav.setAttribute('aria-hidden', 'false');
+        if (topl) topl.classList.add('hidden');
+      } else {
+        nav.classList.remove('visible');
+        nav.setAttribute('aria-hidden', 'true');
+        if (topl) topl.classList.remove('hidden');
+      }
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
 }
 
 function preloaderFirstVisit() {
@@ -104,4 +130,53 @@ window.addEventListener('DOMContentLoaded', async () => {
   showNavbarOnScroll();
   enableSmoothAnchors();
   await preloaderFirstVisit();
+  setupMobileMenu();
 });
+
+function setupMobileMenu() {
+  const btn = document.getElementById('hamburger');
+  const panel = document.getElementById('mobile-menu');
+  const nav = el(SELECTORS.navbar);
+  if (!btn || !panel || !nav) return;
+
+  const close = () => {
+    btn.setAttribute('aria-expanded', 'false');
+    panel.classList.remove('open');
+    panel.setAttribute('hidden', '');
+  };
+
+  const open = () => {
+    btn.setAttribute('aria-expanded', 'true');
+    panel.removeAttribute('hidden');
+    // trigger transition in next frame
+    requestAnimationFrame(() => panel.classList.add('open'));
+  };
+
+  btn.addEventListener('click', () => {
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    if (expanded) close(); else open();
+  });
+
+  // Close when clicking a link
+  panel.querySelectorAll('a').forEach((a) => {
+    a.addEventListener('click', () => close());
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') close();
+  });
+
+  // Ensure scroll show/hide navbar does not conflict: if navbar hides due to returning to top, also close menu
+  const topl = el(SELECTORS.topLinks);
+  if ('IntersectionObserver' in window && topl) {
+    const obs = new IntersectionObserver((entries) => {
+      const e = entries[0];
+      if (e.isIntersecting) {
+        // returning to top
+        close();
+      }
+    }, { root: null, threshold: 0 });
+    obs.observe(topl);
+  }
+}

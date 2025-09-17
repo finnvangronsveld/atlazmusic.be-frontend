@@ -12,7 +12,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Font Awesome for social icons (SRI removed to avoid blocking in some setups) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   </head>
   <body class="no-scroll">
     <!-- First-visit preloader overlay -->
@@ -26,19 +28,44 @@
       </div>
     </div>
 
+    <!-- Top inline links (visible before scrolling; scrolls with page) -->
+    <div class="top-links-wrap">
+      <div id="top-links" class="top-links" aria-hidden="false">
+        <ul>
+          <li><a href="#about">About</a></li>
+          <li><a href="#gigs">Gigs</a></li>
+          <li><a href="#music">Music</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+
     <!-- Glassy navbar (appears on scroll) -->
     <header id="navbar" class="glass-nav" aria-hidden="true">
       <nav class="nav">
         <a class="brand" href="#home" aria-label="ATLAZ Home">
           <img src="scr/img/atlazmusicbeLOGO.png" alt="ATLAZ" />
         </a>
+        <button class="hamburger" id="hamburger" type="button" aria-label="Open menu" aria-controls="mobile-menu" aria-expanded="false">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
         <ul class="links">
           <li><a href="#about">About</a></li>
-          <li><a href="#music">Music</a></li>
           <li><a href="#gigs">Gigs</a></li>
+          <li><a href="#music">Music</a></li>
           <li><a class="cta" href="#contact">Contact</a></li>
         </ul>
       </nav>
+      <div id="mobile-menu" class="mobile-panel" hidden>
+        <ul>
+          <li><a href="#about">About</a></li>
+          <li><a href="#gigs">Gigs</a></li>
+          <li><a href="#music">Music</a></li>
+          <li><a class="cta" href="#contact">Contact</a></li>
+        </ul>
+      </div>
     </header>
 
     <main id="home">
@@ -47,7 +74,20 @@
         <div class="hero-inner">
           <img class="hero-logo" src="scr/img/atlazmusicbeLOGO.png" alt="ATLAZ logo" />
           <h1 class="sr-only">ATLAZ</h1>
-          <p class="tagline">Bold electronic energy. Built for the night.</p>
+          <div class="social-bubbles" aria-label="ATLAZ Social Links">
+            <a class="bubble" href="https://open.spotify.com/artist/3eXIEA0f6BK8ibuR8m9EkF?si=kMzpOwmHSPubPyd3lRq-Qg" aria-label="Spotify" title="Spotify" target="_blank" rel="noopener">
+              <i class="fa-brands fa-spotify" aria-hidden="true"></i><span class="sr-only">Spotify</span>
+            </a>
+            <a class="bubble" href="https://soundcloud.com/atlazmusicbe" aria-label="SoundCloud" title="SoundCloud" target="_blank" rel="noopener">
+              <i class="fa-brands fa-soundcloud" aria-hidden="true"></i><span class="sr-only">SoundCloud</span>
+            </a>
+            <a class="bubble" href="https://www.instagram.com/atlazmusicbe/" aria-label="Instagram" title="Instagram" target="_blank" rel="noopener">
+              <i class="fa-brands fa-instagram" aria-hidden="true"></i><span class="sr-only">Instagram</span>
+            </a>
+            <a class="bubble" href="https://www.tiktok.com/@atlazmusicbe" aria-label="TikTok" title="TikTok" target="_blank" rel="noopener">
+              <i class="fa-brands fa-tiktok" aria-hidden="true"></i><span class="sr-only">TikTok</span>
+            </a>
+          </div>
         </div>
       </section>
 
@@ -59,6 +99,17 @@
             for a sound that hits hard and lingers. Expect sharp selections,
             seamless transitions, and an unforgettable vibe.
           </p>
+        </div>
+      </section>
+
+      <section id="gigs" class="section">
+        <div class="container">
+          <h2>Gigs</h2>
+          <ul class="list">
+            <li><strong>Oct 18</strong> — Warehouse 27, Antwerp</li>
+            <li><strong>Nov 02</strong> — Nightshift, Brussels</li>
+            <li><strong>Dec 14</strong> — Sublevel, Ghent</li>
+          </ul>
         </div>
       </section>
 
@@ -80,17 +131,6 @@
         </div>
       </section>
 
-      <section id="gigs" class="section">
-        <div class="container">
-          <h2>Gigs</h2>
-          <ul class="list">
-            <li><strong>Oct 18</strong> — Warehouse 27, Antwerp</li>
-            <li><strong>Nov 02</strong> — Nightshift, Brussels</li>
-            <li><strong>Dec 14</strong> — Sublevel, Ghent</li>
-          </ul>
-        </div>
-      </section>
-
       <section id="contact" class="section alt">
         <div class="container">
           <h2>Contact</h2>
@@ -103,6 +143,22 @@
     <footer class="footer">
       <div class="container small">
         <p>© <span id="year"></span> ATLAZ. All rights reserved.</p>
+        <div class="footer-social">
+          <div class="social-bubbles" aria-label="ATLAZ Social Links">
+            <a class="bubble" href="#" aria-label="Spotify" title="Spotify" target="_blank" rel="noopener">
+              <i class="fa-brands fa-spotify" aria-hidden="true"></i><span class="sr-only">Spotify</span>
+            </a>
+            <a class="bubble" href="#" aria-label="SoundCloud" title="SoundCloud" target="_blank" rel="noopener">
+              <i class="fa-brands fa-soundcloud" aria-hidden="true"></i><span class="sr-only">SoundCloud</span>
+            </a>
+            <a class="bubble" href="#" aria-label="Instagram" title="Instagram" target="_blank" rel="noopener">
+              <i class="fa-brands fa-instagram" aria-hidden="true"></i><span class="sr-only">Instagram</span>
+            </a>
+            <a class="bubble" href="#" aria-label="TikTok" title="TikTok" target="_blank" rel="noopener">
+              <i class="fa-brands fa-tiktok" aria-hidden="true"></i><span class="sr-only">TikTok</span>
+            </a>
+          </div>
+        </div>
       </div>
     </footer>
 
