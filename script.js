@@ -113,6 +113,36 @@ function preloaderFirstVisit() {
 }
 
 function enableSmoothAnchors() {
+  const ease = (t) => {
+    // cubic-bezier(0.2, 0.8, 0.2, 1)
+    const cX = (p1x, p2x, t) => 3*p1x*(1-t)*(1-t)*t + 3*p2x*(1-t)*t*t + t*t*t;
+    const cY = (p1y, p2y, t) => 3*p1y*(1-t)*(1-t)*t + 3*p2y*(1-t)*t*t + t*t*t;
+    // invert x to get param for y — Newton's method
+    const p1x=0.2, p1y=0.8, p2x=0.2, p2y=1.0;
+    let u = t;
+    for (let i=0;i<5;i++) {
+      const x = cX(p1x, p2x, u) - t;
+      const dx = 3*(1-u)*(1-u)*p1x + 6*(1-u)*u*(p2x - p1x) + 3*u*u*(1 - p2x);
+      if (Math.abs(dx) < 1e-6) break;
+      u -= x / dx;
+      u = Math.min(1, Math.max(0, u));
+    }
+    return cY(p1y, p2y, u);
+  };
+
+  const animateScroll = (toY, duration = 600) => {
+    const startY = window.scrollY || document.documentElement.scrollTop;
+    const delta = toY - startY;
+    const start = performance.now();
+    function step(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const e = ease(t);
+      window.scrollTo(0, startY + delta * e);
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  };
+
   document.querySelectorAll('a[href^="#"]').forEach((a) => {
     a.addEventListener('click', (e) => {
       const id = a.getAttribute('href');
@@ -120,7 +150,9 @@ function enableSmoothAnchors() {
       const target = document.querySelector(id);
       if (!target) return;
       e.preventDefault();
-      target.scrollIntoView({ behavior: 'smooth' });
+      const rect = target.getBoundingClientRect();
+      const toY = (window.scrollY || document.documentElement.scrollTop) + rect.top;
+      animateScroll(toY, 700);
     });
   });
 }
@@ -148,7 +180,9 @@ function setupMobileMenu() {
   const open = () => {
     btn.setAttribute('aria-expanded', 'true');
     panel.removeAttribute('hidden');
-    // trigger transition in next frame
+    // trigger transition: force reflow then add class
+    // eslint-disable-next-line no-unused-expressions
+    void panel.offsetHeight;
     requestAnimationFrame(() => panel.classList.add('open'));
   };
 
