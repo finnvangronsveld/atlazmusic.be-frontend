@@ -79,7 +79,7 @@ img { display: block; max-width: 100%; height: auto; }
 .nav .brand img { height: 32px; width: auto; opacity: 0.95; flex-shrink: 0; object-fit: contain; }
 .hamburger { display: none; }
 .nav .links { list-style: none; display: flex; gap: 14px; padding: 0; margin: 0; }
-.nav .links a { color: var(--text); text-decoration: none; padding: 10px 14px; border-radius: 10px; font-weight: 600; letter-spacing: 0.02em; opacity: 0.85; transition: opacity var(--transition), background var(--transition), color var(--transition); }
+.nav .links a { color: var(--text); text-decoration: none; padding: 10px 14px; border-radius: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; transition: opacity var(--transition), background var(--transition), color var(--transition); }
 .nav .links a:hover { opacity: 1; background: rgba(255,255,255,0.08); }
 .nav .links .cta { background: none; color: var(--text); }
 .nav .links .cta:hover { background: none; text-decoration: underline; filter: none; }
@@ -180,7 +180,7 @@ html { scroll-behavior: smooth; }
 .top-links { display: grid; place-items: center; padding-top: 16px; transition: opacity var(--transition), visibility var(--transition); }
 .top-links.hidden { opacity: 0; visibility: hidden; transition: opacity var(--transition), visibility var(--transition); }
 .top-links ul { list-style: none; display: flex; gap: 28px; margin: 0; padding: 6px 12px; border-radius: 999px; }
-.top-links a { color: #ffffff; text-decoration: none; font-weight: 700; letter-spacing: 0.02em; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+.top-links a { color: #ffffff; text-decoration: none; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
 .top-links a:hover { text-decoration: underline; }
 
 /* Responsive */
@@ -221,7 +221,7 @@ html { scroll-behavior: smooth; }
   .mobile-panel[hidden] { display: none; max-height: 0; opacity: 0; padding: 0; margin-top: 0; }
   .mobile-panel.open { max-height: 260px; opacity: 1; padding: 8px 6px 10px; margin-top: 8px; }
   .mobile-panel > ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; justify-items: center; }
-  .mobile-panel a { color: var(--text); text-decoration: none; font-weight: 700; padding: 10px 12px; border-radius: 10px; width: 100%; max-width: 420px; text-align: center; background: none; border: none; }
+  .mobile-panel a { color: var(--text); text-decoration: none; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 12px; border-radius: 10px; width: 100%; max-width: 420px; text-align: center; background: none; border: none; }
   .mobile-panel a:hover { text-decoration: underline; }
   .mobile-panel a.cta { background: none; color: var(--text); border: none; }
 

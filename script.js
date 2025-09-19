@@ -163,6 +163,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   enableSmoothAnchors();
   await preloaderFirstVisit();
   setupMobileMenu();
+  await loadAndRenderBookings();
 });
 
 function setupMobileMenu() {
@@ -213,4 +214,173 @@ function setupMobileMenu() {
     }, { root: null, threshold: 0 });
     obs.observe(topl);
   }
+}
+
+// --- Bookings rendering ---
+/**
+ * Contract:
+ * - Input: array of bookings [{ date: 'YYYY-MM-DD', start: 'HH:mm', end: 'HH:mm', name: string, venue: string }]
+ * - Output: Renders cards into #bookings-cards, or an empty message if none
+ */
+function getSampleBookings() {
+  // Placeholder data; replace with backend fetch later
+  return [
+    { date: '2025-09-20', start: '22:00', end: '23:30', name: 'Books & Beats', venue: 'Onkrooid, Arendonk', link: 'https://example.com/books-and-beats' },
+    { date: '2025-10-02', start: '23:00', end: '03:00', name: 'Girls Like DJs', venue: 'Kokorico, Lievegem', link: 'https://example.com/girls-like-djs' },
+  ];
+}
+
+async function fetchBookings() {
+  try {
+    const apiBase = document.querySelector('meta[name="api-base"]')?.content?.trim() || '';
+    const url = (apiBase ? apiBase.replace(/\/$/, '') : '') + '/api/bookings';
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    // Normalize to expected shape and coerce types
+    return (Array.isArray(data) ? data : []).map((b) => ({
+      date: b.date,           // 'YYYY-MM-DD'
+      start: b.start,         // 'HH:mm'
+      end: b.end,             // 'HH:mm'
+      name: b.name,           // string
+      venue: b.venue,         // string
+      link: b.link || b.url || b.detailsUrl || '', // support common field names
+    })).filter(b => b && b.date && b.name);
+  } catch (e) {
+    // Fallback to samples on any error
+    return getSampleBookings();
+  }
+}
+
+async function loadAndRenderBookings() {
+  const bookings = await fetchBookings();
+  renderBookings(bookings);
+}
+
+function formatDateLabel(iso) {
+  try {
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString(undefined, { month: 'short', day: '2-digit' });
+  } catch { return iso; }
+}
+
+function renderBookings(bookings = getSampleBookings()) {
+  const wrap = document.getElementById('bookings-cards');
+  const empty = document.getElementById('bookings-empty');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  if (!bookings || bookings.length === 0) {
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  // Sort by date ascending
+  bookings.sort((a, b) => (a.date > b.date ? 1 : -1));
+
+  for (const b of bookings) {
+    const card = document.createElement('article');
+    card.className = 'card';
+
+    const h3 = document.createElement('h3');
+    h3.textContent = b.name || 'Event';
+
+    const p = document.createElement('p');
+    const dateLbl = formatDateLabel(b.date);
+    const timeLbl = b.start && b.end ? `${b.start}–${b.end}` : b.start || '';
+    p.textContent = `${dateLbl}${timeLbl ? ' • ' + timeLbl : ''} — ${b.venue || ''}`;
+
+    // CTAs
+    const btnRow = document.createElement('div');
+    btnRow.style.display = 'flex';
+    btnRow.style.gap = '10px';
+
+  const detailsBtn = document.createElement('a');
+  detailsBtn.className = 'btn';
+  detailsBtn.href = b.link || '#';
+  if (b.link) { detailsBtn.target = '_blank'; detailsBtn.rel = 'noopener'; }
+  detailsBtn.setAttribute('aria-label', `More info for ${b.name || 'event'}`);
+  detailsBtn.textContent = 'Details';
+
+    const gcalBtn = document.createElement('a');
+    gcalBtn.className = 'btn';
+    gcalBtn.target = '_blank';
+    gcalBtn.rel = 'noopener';
+    gcalBtn.href = buildGoogleCalendarUrl({
+      name: b.name,
+      date: b.date,
+      start: b.start,
+      end: b.end,
+      venue: b.venue,
+    });
+  gcalBtn.setAttribute('aria-label', `Add ${b.name || 'event'} To Calender`);
+  gcalBtn.textContent = 'Add To Calender';
+
+    btnRow.append(detailsBtn, gcalBtn);
+    card.append(h3, p, btnRow);
+    wrap.appendChild(card);
+  }
+}
+
+// --- Google Calendar URL helper ---
+function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+function toGCalDateTime(dateStr, timeStr) {
+  // Build local Date, then format as UTC YYYYMMDDTHHMMSSZ
+  const [y, m, d] = dateStr.split('-').map(Number);
+  let hh = 0, mm = 0;
+  if (timeStr) {
+    const parts = timeStr.split(':');
+    hh = Number(parts[0] || 0);
+    mm = Number(parts[1] || 0);
+  }
+  const dt = new Date(y, (m - 1), d, hh, mm, 0);
+  return (
+    dt.getUTCFullYear() +
+    pad2(dt.getUTCMonth() + 1) +
+    pad2(dt.getUTCDate()) + 'T' +
+    pad2(dt.getUTCHours()) +
+    pad2(dt.getUTCMinutes()) +
+    pad2(dt.getUTCSeconds()) + 'Z'
+  );
+}
+
+function buildGoogleCalendarUrl({ name = 'Event', date, start, end, venue = '' }) {
+  // If end is before/equal start, assume it ends the next day or add 2h default
+  const startLocal = new Date(date + 'T' + (start || '20:00') + ':00');
+  let endLocal;
+  if (end) {
+    endLocal = new Date(date + 'T' + end + ':00');
+    if (endLocal <= startLocal) {
+      // add 1 day if crosses midnight
+      endLocal.setDate(endLocal.getDate() + 1);
+    }
+  } else {
+    endLocal = new Date(startLocal.getTime() + 2 * 60 * 60 * 1000);
+  }
+
+  const startStr = (
+    startLocal.getUTCFullYear() +
+    pad2(startLocal.getUTCMonth() + 1) +
+    pad2(startLocal.getUTCDate()) + 'T' +
+    pad2(startLocal.getUTCHours()) +
+    pad2(startLocal.getUTCMinutes()) +
+    pad2(startLocal.getUTCSeconds()) + 'Z'
+  );
+  const endStr = (
+    endLocal.getUTCFullYear() +
+    pad2(endLocal.getUTCMonth() + 1) +
+    pad2(endLocal.getUTCDate()) + 'T' +
+    pad2(endLocal.getUTCHours()) +
+    pad2(endLocal.getUTCMinutes()) +
+    pad2(endLocal.getUTCSeconds()) + 'Z'
+  );
+
+  const base = 'https://calendar.google.com/calendar/render?action=TEMPLATE';
+  const params = new URLSearchParams({
+    text: name,
+    dates: `${startStr}/${endStr}`,
+    details: 'ATLAZ booking',
+    location: venue,
+  });
+  return `${base}&${params.toString()}`;
 }

@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="styles.css" />
   <!-- Font Awesome for social icons (SRI removed to avoid blocking in some setups) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <meta name="api-base" content="http://127.0.0.1:8000" />
   </head>
   <body class="no-scroll">
     <!-- First-visit preloader overlay -->
@@ -33,7 +34,7 @@
       <div id="top-links" class="top-links" aria-hidden="false">
         <ul>
           <li><a href="#about">About</a></li>
-          <li><a href="#gigs">Gigs</a></li>
+          <li><a href="#gigs">Bookings</a></li>
           <li><a href="#music">Music</a></li>
           <li><a href="#contact">Contact</a></li>
         </ul>
@@ -53,7 +54,7 @@
         </button>
         <ul class="links">
           <li><a href="#about">About</a></li>
-          <li><a href="#gigs">Gigs</a></li>
+          <li><a href="#gigs">Bookings</a></li>
           <li><a href="#music">Music</a></li>
           <li><a class="cta" href="#contact">Contact</a></li>
         </ul>
@@ -61,7 +62,7 @@
       <div id="mobile-menu" class="mobile-panel" hidden>
         <ul>
           <li><a href="#about">About</a></li>
-          <li><a href="#gigs">Gigs</a></li>
+          <li><a href="#gigs">Bookings</a></li>
           <li><a href="#music">Music</a></li>
           <li><a class="cta" href="#contact">Contact</a></li>
         </ul>
@@ -103,12 +104,9 @@
 
       <section id="gigs" class="section">
         <div class="container">
-          <h2>Gigs</h2>
-          <ul class="list">
-            <li><strong>Oct 18</strong> — Warehouse 27, Antwerp</li>
-            <li><strong>Nov 02</strong> — Nightshift, Brussels</li>
-            <li><strong>Dec 14</strong> — Sublevel, Ghent</li>
-          </ul>
+          <h2>Bookings</h2>
+          <div id="bookings-cards" class="cards" aria-live="polite"></div>
+          <p id="bookings-empty" style="display:none;">No announced bookings for now. Follow to stay tuned.</p>
         </div>
       </section>
 
