@@ -1,0 +1,32 @@
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.coverage
+.coverage.*
+htmlcov/
+.venv/
+venv/
+
+# Env / secrets
+.env
+.env.*
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Build / Dist
+dist/
+build/
+out/
+coverage/

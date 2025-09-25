@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>ATLAZ — Admin</title>
+    <meta name="description" content="ATLAZ Admin — manage bookings." />
+    <link rel="icon" href="scr/img/atlazmusicbeLOGO.png" />
+    <link rel="preload" as="image" href="scr/img/atlazmusicbeLOGO.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="api-base" content="http://127.0.0.1:8000" />
+
+    <style>
+      /* Minimal form styling to match glass aesthetic without touching global CSS */
+      .admin-wrap { padding: 30px 20px 60px; }
+      .admin-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+      .admin-header img { height: 28px; width: auto; }
+      .grid { display: grid; gap: 14px; }
+      .grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      @media (max-width: 720px) { .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; } }
+      .field { display: grid; gap: 6px; }
+      .field label { font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.85rem; }
+      .input, .select { 
+        width: 100%; padding: 12px 14px; border-radius: 12px; color: #fff; 
+        background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+        -webkit-backdrop-filter: blur(14px) saturate(160%) contrast(1.04);
+        backdrop-filter: blur(14px) saturate(160%) contrast(1.04);
+        border: 1px solid rgba(255,255,255,0.16);
+        outline: none; font: inherit;
+      }
+      .input::placeholder { color: #b7b7b7; }
+      .actions { display: flex; gap: 10px; justify-content: flex-end; }
+      .alert { 
+        border-radius: 12px; padding: 12px 14px; font-weight: 600;
+        background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+        border: 1px solid rgba(255,255,255,0.16);
+      }
+      .alert.success { border-color: rgba(0,255,209,0.45); box-shadow: 0 0 0 1px rgba(0,255,209,0.12) inset; }
+      .alert.error { border-color: rgba(255,0,122,0.45); box-shadow: 0 0 0 1px rgba(255,0,122,0.12) inset; }
+      .muted { color: var(--muted); }
+      .list-grid { display: grid; gap: 10px; }
+      .row { display: grid; grid-template-columns: 1.6fr 1fr 1fr 2fr auto; gap: 10px; align-items: center; }
+      @media (max-width: 860px) { .row { grid-template-columns: 1.6fr 1fr 1fr 1.6fr; } .row .hide-sm { display: none; } }
+      .row .pill { font-size: 0.8rem; padding: 4px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.18); opacity: 0.9; }
+      .header-row { opacity: 0.75; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.84rem; }
+      a.link { color: #fff; text-decoration: underline; }
+    </style>
+  </head>
+
+  <body>
+    <main class="admin-wrap">
+      <div class="container small">
+        <div class="admin-header">
+          <a href="index.html" class="brand" aria-label="Back to site"><img src="scr/img/atlazmusicbeLOGO.png" alt="ATLAZ"></a>
+          <h1 style="margin:0">Admin — Bookings</h1>
+        </div>
+
+        <section class="section" style="padding: 0;">
+          <article class="card">
+            <h2 style="margin-top:0">Add a booking</h2>
+            <div id="admin-alert" class="alert" style="display:none"></div>
+            <form id="booking-form" class="grid" novalidate>
+              <div class="grid cols-3">
+                <div class="field">
+                  <label for="date">Date</label>
+                  <input id="date" name="date" class="input" type="date" required />
+                </div>
+                <div class="field">
+                  <label for="start">Start</label>
+                  <input id="start" name="start" class="input" type="time" placeholder="HH:mm" />
+                </div>
+                <div class="field">
+                  <label for="end">End</label>
+                  <input id="end" name="end" class="input" type="time" placeholder="HH:mm" />
+                </div>
+              </div>
+              <div class="grid cols-2">
+                <div class="field">
+                  <label for="name">Name</label>
+                  <input id="name" name="name" class="input" type="text" placeholder="Event name" required />
+                </div>
+                <div class="field">
+                  <label for="venue">Venue</label>
+                  <input id="venue" name="venue" class="input" type="text" placeholder="Venue, City" required />
+                </div>
+              </div>
+              <div class="field">
+                <label for="link">Link</label>
+                <input id="link" name="link" class="input" type="url" placeholder="https://example.com/details" />
+              </div>
+              <div class="actions">
+                <button id="submit" type="submit" class="btn">Add booking</button>
+              </div>
+              <p class="muted" style="margin: 8px 0 0">Note: This demo server stores data in-memory only. Restarting the API will reset the list.</p>
+            </form>
+          </article>
+        </section>
+
+        <section class="section" style="padding-top: 24px;">
+          <article class="card">
+            <h2 style="margin-top:0">Current bookings</h2>
+            <div class="row header-row">
+              <div>Event</div>
+              <div>Date</div>
+              <div class="hide-sm">Time</div>
+              <div>Venue</div>
+              <div>Link</div>
+            </div>
+            <div id="admin-bookings-list" class="list-grid" style="margin-top: 6px;"></div>
+            <p id="admin-empty" class="muted" style="display:none; margin-top: 8px;">No bookings yet.</p>
+          </article>
+        </section>
+      </div>
+    </main>
+
+    <script src="admin.js" type="module"></script>
+  </body>
+  </html>
