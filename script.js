@@ -269,16 +269,30 @@ function renderBookings(bookings = getSampleBookings()) {
   const empty = document.getElementById('bookings-empty');
   if (!wrap) return;
   wrap.innerHTML = '';
-  if (!bookings || bookings.length === 0) {
+  
+  // Filter out past bookings - only show upcoming events
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset to start of day for comparison
+  
+  const upcomingBookings = (bookings || []).filter(b => {
+    try {
+      const eventDate = new Date(b.date + 'T00:00:00');
+      return eventDate >= today;
+    } catch {
+      return false; // Invalid date format, exclude
+    }
+  });
+  
+  if (!upcomingBookings || upcomingBookings.length === 0) {
     if (empty) empty.style.display = '';
     return;
   }
   if (empty) empty.style.display = 'none';
 
   // Sort by date ascending
-  bookings.sort((a, b) => (a.date > b.date ? 1 : -1));
+  upcomingBookings.sort((a, b) => (a.date > b.date ? 1 : -1));
 
-  for (const b of bookings) {
+  for (const b of upcomingBookings) {
     const card = document.createElement('article');
     card.className = 'card';
 
