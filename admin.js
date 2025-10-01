@@ -13,7 +13,7 @@ function setAlert(kind, message) {
 
 async function getBookings() {
   try {
-    const res = await fetch(apiBase + '/api/bookings', { headers: { 'Accept': 'application/json' } });
+    const res = await fetch(apiBase + '/events/', { headers: { 'Accept': 'application/json' } });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return await res.json();
   } catch (e) {
@@ -82,7 +82,7 @@ function validate(form) {
 }
 
 async function submitBooking(payload) {
-  const res = await fetch(apiBase + '/api/bookings', {
+  const res = await fetch(apiBase + '/events/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify(payload),

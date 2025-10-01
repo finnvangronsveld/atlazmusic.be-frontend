@@ -222,21 +222,18 @@ function setupMobileMenu() {
  * - Input: array of bookings [{ date: 'YYYY-MM-DD', start: 'HH:mm', end: 'HH:mm', name: string, venue: string }]
  * - Output: Renders cards into #bookings-cards, or an empty message if none
  */
-function getSampleBookings() {
-  // Placeholder data; replace with backend fetch later
-  return [
-    { date: '2025-09-20', start: '22:00', end: '23:30', name: 'Books & Beats', venue: 'Onkrooid, Arendonk', link: 'https://example.com/books-and-beats' },
-    { date: '2025-10-02', start: '23:00', end: '03:00', name: 'Girls Like DJs', venue: 'Kokorico, Lievegem', link: 'https://example.com/girls-like-djs' },
-  ];
-}
+
 
 async function fetchBookings() {
   try {
     const apiBase = document.querySelector('meta[name="api-base"]')?.content?.trim() || '';
-    const url = (apiBase ? apiBase.replace(/\/$/, '') : '') + '/api/bookings';
+    const url = (apiBase ? apiBase.replace(/\/$/, '') : '') + '/events/';
+    console.log('Fetching from URL:', url);
     const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    console.log('Response status:', res.status);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
+    console.log('Fetched data:', data);
     // Normalize to expected shape and coerce types
     return (Array.isArray(data) ? data : []).map((b) => ({
       date: b.date,           // 'YYYY-MM-DD'
@@ -247,8 +244,9 @@ async function fetchBookings() {
       link: b.link || b.url || b.detailsUrl || '', // support common field names
     })).filter(b => b && b.date && b.name);
   } catch (e) {
-    // Fallback to samples on any error
-    return getSampleBookings();
+    // Return empty array on API error
+    console.error('Failed to fetch bookings:', e);
+    return [];
   }
 }
 
@@ -258,30 +256,29 @@ async function loadAndRenderBookings() {
 }
 
 function formatDateLabel(iso) {
+  // Handle invalid dates like "00:00" by showing them as-is for now
+  if (!iso || iso === "00:00" || iso.length < 8) {
+    return "Date TBD"; // Show "Date TBD" for invalid dates
+  }
   try {
     const d = new Date(iso + 'T00:00:00');
+    if (isNaN(d.getTime())) {
+      return "Date TBD";
+    }
     return d.toLocaleDateString(undefined, { month: 'short', day: '2-digit' });
-  } catch { return iso; }
+  } catch { 
+    return "Date TBD"; 
+  }
 }
 
-function renderBookings(bookings = getSampleBookings()) {
+function renderBookings(bookings = []) {
   const wrap = document.getElementById('bookings-cards');
   const empty = document.getElementById('bookings-empty');
   if (!wrap) return;
   wrap.innerHTML = '';
   
-  // Filter out past bookings - only show upcoming events
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Reset to start of day for comparison
-  
-  const upcomingBookings = (bookings || []).filter(b => {
-    try {
-      const eventDate = new Date(b.date + 'T00:00:00');
-      return eventDate >= today;
-    } catch {
-      return false; // Invalid date format, exclude
-    }
-  });
+  // Show all bookings for now (date filtering temporarily disabled)
+  const upcomingBookings = bookings || [];
   
   if (!upcomingBookings || upcomingBookings.length === 0) {
     if (empty) empty.style.display = '';
@@ -301,8 +298,20 @@ function renderBookings(bookings = getSampleBookings()) {
 
     const p = document.createElement('p');
     const dateLbl = formatDateLabel(b.date);
-    const timeLbl = b.start && b.end ? `${b.start}–${b.end}` : b.start || '';
-    p.textContent = `${dateLbl}${timeLbl ? ' • ' + timeLbl : ''} — ${b.venue || ''}`;
+    
+    // Handle time display - show "Timetable Unavailable" if no valid times
+    let timeLbl = '';
+    if (!b.start && !b.end) {
+      timeLbl = 'Timetable Unavailable';
+    } else if (b.start && b.end) {
+      timeLbl = `${b.start}–${b.end}`;
+    } else if (b.start) {
+      timeLbl = b.start;
+    } else {
+      timeLbl = 'Timetable Unavailable';
+    }
+    
+    p.textContent = `${dateLbl} • ${timeLbl} — ${b.venue || ''}`;
 
     // CTAs
     const btnRow = document.createElement('div');
