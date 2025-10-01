@@ -277,8 +277,21 @@ function renderBookings(bookings = []) {
   if (!wrap) return;
   wrap.innerHTML = '';
   
-  // Show all bookings for now (date filtering temporarily disabled)
-  const upcomingBookings = bookings || [];
+  // Filter to only show future events
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to start of today
+  
+  const upcomingBookings = (bookings || []).filter(booking => {
+    if (!booking.date || booking.date === "00:00" || booking.date.length < 8) {
+      return true; // Keep events with "Date TBD" (invalid dates)
+    }
+    try {
+      const eventDate = new Date(booking.date + 'T00:00:00');
+      return eventDate >= today; // Only show today and future events
+    } catch {
+      return true; // Keep events with invalid dates
+    }
+  });
   
   if (!upcomingBookings || upcomingBookings.length === 0) {
     if (empty) empty.style.display = '';

@@ -1,53 +1,228 @@
-// Admin interactions for managing bookings
+// Admin Panel CRUD Operations for Events Management
 
-const $ = (s) => document.querySelector(s);
-const apiBase = document.querySelector('meta[name="api-base"]')?.content?.trim().replace(/\/$/, '') || '';
+const API_BASE = document.querySelector('meta[name="api-base"]')?.content || 'https://atlazmusicbe-backend-theta.vercel.app';
 
-function setAlert(kind, message) {
-  const box = $('#admin-alert');
-  if (!box) return;
-  box.className = 'alert ' + (kind || '');
-  box.textContent = message || '';
-  box.style.display = message ? '' : 'none';
+let currentEditId = null;
+
+// DOM Elements
+const form = document.getElementById('booking-form');
+const submitBtn = document.getElementById('submit');
+const cancelBtn = document.getElementById('cancel-edit');
+const editIdField = document.getElementById('edit-id');
+const alert = document.getElementById('admin-alert');
+const bookingsList = document.getElementById('admin-bookings-list');
+const emptyMsg = document.getElementById('admin-empty');
+
+// Form fields
+const fields = {
+    date: document.getElementById('date'),
+    start: document.getElementById('start'),
+    end: document.getElementById('end'),
+    name: document.getElementById('name'),
+    venue: document.getElementById('venue'),
+    link: document.getElementById('link')
+};
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    loadBookings();
+    setupEventListeners();
+});
+
+function setupEventListeners() {
+    form.addEventListener('submit', handleFormSubmit);
+    cancelBtn.addEventListener('click', cancelEdit);
 }
 
-async function getBookings() {
-  try {
-    const res = await fetch(apiBase + '/events/', { headers: { 'Accept': 'application/json' } });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    return await res.json();
-  } catch (e) {
-    setAlert('error', 'Failed to load bookings. Is the backend running?');
-    return [];
-  }
+// API Functions
+async function apiRequest(endpoint, options = {}) {
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            },
+            ...options
+        });
+
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('API Request failed:', error);
+        showAlert(`Request failed: ${error.message}`, 'error');
+        throw error;
+    }
 }
 
-function fmtDate(iso) {
-  try {
-    const d = new Date(iso + 'T00:00:00');
-    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' });
-  } catch { return iso; }
+async function loadBookings() {
+    try {
+        const bookings = await apiRequest('/events/');
+        renderBookings(bookings);
+    } catch (error) {
+        showAlert('Failed to load bookings', 'error');
+    }
 }
 
-function renderList(items = []) {
-  const list = $('#admin-bookings-list');
-  const empty = $('#admin-empty');
-  if (!list) return;
-  list.innerHTML = '';
-  if (!items.length) {
-    if (empty) empty.style.display = '';
-    return;
-  }
-  if (empty) empty.style.display = 'none';
+async function createBooking(bookingData) {
+    return await apiRequest('/events/', {
+        method: 'POST',
+        body: JSON.stringify(bookingData)
+    });
+}
 
-  // sort ascending like frontend
-  items.sort((a, b) => (a.date > b.date ? 1 : -1));
+async function updateBooking(id, bookingData) {
+    return await apiRequest(`/events/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(bookingData)
+    });
+}
 
-  for (const b of items) {
-    const row = document.createElement('div');
-    row.className = 'row';
-    const name = document.createElement('div');
-    name.textContent = b.name || 'Event';
+async function deleteBooking(id) {
+    return await apiRequest(`/events/${id}`, {
+        method: 'DELETE'
+    });
+}
+
+// Form Handling
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    const bookingData = getFormData();
+    if (!validateForm(bookingData)) return;
+
+    try {
+        submitBtn.disabled = true;
+        submitBtn.textContent = currentEditId ? 'Updating...' : 'Adding...';
+
+        if (currentEditId) {
+            await updateBooking(currentEditId, bookingData);
+            showAlert('Event updated successfully!', 'success');
+        } else {
+            await createBooking(bookingData);
+            showAlert('Event added successfully!', 'success');
+        }
+
+        resetForm();
+        loadBookings();
+    } catch (error) {
+        showAlert(currentEditId ? 'Failed to update event' : 'Failed to add event', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = currentEditId ? 'Update booking' : 'Add booking';
+    }
+}
+
+function getFormData() {
+    return {
+        date: fields.date.value,
+        start: fields.start.value || null,
+        end: fields.end.value || null,
+        name: fields.name.value.trim(),
+        venue: fields.venue.value.trim(),
+        link: fields.link.value.trim() || null
+    };
+}
+
+function validateForm(data) {
+    if (!data.name || !data.venue || !data.date) {
+        showAlert('Please fill in all required fields (Name, Venue, Date)', 'error');
+        return false;
+    }
+    return true;
+}
+
+function resetForm() {
+    form.reset();
+    currentEditId = null;
+    editIdField.value = '';
+    submitBtn.textContent = 'Add booking';
+    cancelBtn.style.display = 'none';
+}
+
+function cancelEdit() {
+    resetForm();
+    showAlert('Edit cancelled', 'info');
+}
+
+// CRUD Operations UI
+function startEdit(booking) {
+    currentEditId = booking.id;
+    editIdField.value = booking.id;
+    
+    // Populate form with booking data
+    fields.date.value = booking.date || '';
+    fields.start.value = booking.start || '';
+    fields.end.value = booking.end || '';
+    fields.name.value = booking.name || '';
+    fields.venue.value = booking.venue || '';
+    fields.link.value = booking.link || '';
+    
+    // Update UI for edit mode
+    submitBtn.textContent = 'Update booking';
+    cancelBtn.style.display = 'inline-block';
+    
+    // Scroll to form
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    showAlert(`Editing: ${booking.name}`, 'info');
+}
+
+async function confirmDelete(booking) {
+    const confirmed = confirm(`Are you sure you want to delete "${booking.name}"?\n\nThis action cannot be undone.`);
+    
+    if (confirmed) {
+        try {
+            await deleteBooking(booking.id);
+            showAlert('Event deleted successfully!', 'success');
+            loadBookings();
+        } catch (error) {
+            showAlert('Failed to delete event', 'error');
+        }
+    }
+}
+
+// UI Rendering
+function renderBookings(bookings = []) {
+    if (!bookings || bookings.length === 0) {
+        bookingsList.innerHTML = '';
+        emptyMsg.style.display = 'block';
+        return;
+    }
+
+    emptyMsg.style.display = 'none';
+    
+    // Sort by date ascending
+    bookings.sort((a, b) => (a.date > b.date ? 1 : -1));
+
+    bookingsList.innerHTML = bookings.map(booking => createBookingRow(booking)).join('');
+}
+
+function createBookingRow(booking) {
+    const dateLbl = formatDateLabel(booking.date);
+    const timeLbl = formatTimeLabel(booking.start, booking.end);
+    const linkLbl = booking.link ? `<a href="${booking.link}" target="_blank" rel="noopener">🔗</a>` : '-';
+    
+    return `
+        <div class="row">
+            <div><strong>${escapeHtml(booking.name)}</strong></div>
+            <div>${dateLbl}</div>
+            <div class="hide-sm">${timeLbl}</div>
+            <div>${escapeHtml(booking.venue)}</div>
+            <div>${linkLbl}</div>
+            <div class="actions-cell">
+                <button class="btn-icon edit-btn" onclick="startEdit(${JSON.stringify(booking).replace(/"/g, '&quot;')})" title="Edit Event">
+                    ✏️
+                </button>
+                <button class="btn-icon delete-btn" onclick="confirmDelete(${JSON.stringify(booking).replace(/"/g, '&quot;')})" title="Delete Event">
+                    🗑️
+                </button>
+            </div>
+        </div>
+    `;
+}
     const date = document.createElement('div');
     date.textContent = fmtDate(b.date);
     const time = document.createElement('div');
@@ -69,56 +244,58 @@ function renderList(items = []) {
   }
 }
 
-function validate(form) {
-  const data = Object.fromEntries(new FormData(form).entries());
-  const errors = [];
-  if (!data.date) errors.push('Date is required.');
-  if (!data.name) errors.push('Name is required.');
-  if (!data.venue) errors.push('Venue is required.');
-  if (data.start && !/^\d{2}:\d{2}$/.test(data.start)) errors.push('Start must be HH:mm.');
-  if (data.end && !/^\d{2}:\d{2}$/.test(data.end)) errors.push('End must be HH:mm.');
-  if (data.link && !/^https?:\/\//i.test(data.link)) errors.push('Link must start with http:// or https://');
-  return { data, errors };
-}
-
-async function submitBooking(payload) {
-  const res = await fetch(apiBase + '/events/', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  return res.json();
-}
-
-async function refresh() {
-  const items = await getBookings();
-  renderList(items);
-}
-
-window.addEventListener('DOMContentLoaded', async () => {
-  await refresh();
-  const form = document.getElementById('booking-form');
-  const btn = document.getElementById('submit');
-
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    setAlert('', '');
-    const { data, errors } = validate(form);
-    if (errors.length) {
-      setAlert('error', errors.join(' '));
-      return;
+// Utility Functions
+function formatDateLabel(iso) {
+    if (!iso || iso === "00:00" || iso.length < 8) {
+        return "Date TBD";
     }
     try {
-      btn.disabled = true; btn.textContent = 'Saving…';
-      await submitBooking(data);
-      setAlert('success', 'Booking added.');
-      form.reset();
-      await refresh();
-    } catch (err) {
-      setAlert('error', 'Failed to add booking. Is the backend running?');
-    } finally {
-      btn.disabled = false; btn.textContent = 'Add booking';
+        const d = new Date(iso + 'T00:00:00');
+        if (isNaN(d.getTime())) {
+            return "Date TBD";
+        }
+        return d.toLocaleDateString(undefined, { 
+            weekday: 'short',
+            month: 'short', 
+            day: '2-digit',
+            year: 'numeric'
+        });
+    } catch { 
+        return "Date TBD"; 
     }
-  });
-});
+}
+
+function formatTimeLabel(start, end) {
+    if (!start && !end) {
+        return 'TBD';
+    } else if (start && end) {
+        return `${start}–${end}`;
+    } else if (start) {
+        return start;
+    } else {
+        return end;
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function showAlert(message, type = 'info') {
+    alert.textContent = message;
+    alert.className = `alert alert-${type}`;
+    alert.style.display = 'block';
+    
+    // Auto-hide success and info messages
+    if (type === 'success' || type === 'info') {
+        setTimeout(() => {
+            alert.style.display = 'none';
+        }, 4000);
+    }
+}
+
+// Make functions available globally for onclick handlers
+window.startEdit = startEdit;
+window.confirmDelete = confirmDelete;

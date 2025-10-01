@@ -12,13 +12,75 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css" />
-    <meta name="api-base" content="https://atlazmusicbe-backend-7ftutvzp5-andreas-projects-717e6076.vercel.app" />
+    <meta name="api-base" content="https://atlazmusicbe-backend-theta.vercel.app" />
 
     <style>
       /* Minimal form styling to match glass aesthetic without touching global CSS */
       .admin-wrap { padding: 30px 20px 60px; }
       .admin-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
       .admin-header img { height: 28px; width: auto; }
+      
+      /* CRUD Action Buttons */
+      .actions-cell {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      
+      .btn-icon {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        padding: 6px 8px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        color: white;
+      }
+      
+      .btn-icon:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+      }
+      
+      .edit-btn:hover {
+        background: rgba(52, 152, 219, 0.3);
+        border-color: rgba(52, 152, 219, 0.5);
+      }
+      
+      .delete-btn:hover {
+        background: rgba(231, 76, 60, 0.3);
+        border-color: rgba(231, 76, 60, 0.5);
+      }
+      
+      .btn-secondary {
+        background: rgba(108, 117, 125, 0.2);
+        border-color: rgba(108, 117, 125, 0.3);
+      }
+      
+      .btn-secondary:hover {
+        background: rgba(108, 117, 125, 0.4);
+      }
+      
+      /* Alert styles */
+      .alert-success {
+        background: rgba(40, 167, 69, 0.2);
+        border-color: rgba(40, 167, 69, 0.5);
+        color: #d4edda;
+      }
+      
+      .alert-error {
+        background: rgba(220, 53, 69, 0.2);
+        border-color: rgba(220, 53, 69, 0.5);
+        color: #f8d7da;
+      }
+      
+      .alert-info {
+        background: rgba(23, 162, 184, 0.2);
+        border-color: rgba(23, 162, 184, 0.5);
+        color: #d1ecf1;
+      }
       .grid { display: grid; gap: 14px; }
       .grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -65,6 +127,7 @@
             <h2 style="margin-top:0">Add a booking</h2>
             <div id="admin-alert" class="alert" style="display:none"></div>
             <form id="booking-form" class="grid" novalidate>
+              <input type="hidden" id="edit-id" name="edit-id" />
               <div class="grid cols-3">
                 <div class="field">
                   <label for="date">Date</label>
@@ -95,6 +158,7 @@
               </div>
               <div class="actions">
                 <button id="submit" type="submit" class="btn">Add booking</button>
+                <button id="cancel-edit" type="button" class="btn btn-secondary" style="display:none; margin-left: 8px;">Cancel Edit</button>
               </div>
               <p class="muted" style="margin: 8px 0 0">Note: This demo server stores data in-memory only. Restarting the API will reset the list.</p>
             </form>
@@ -110,6 +174,7 @@
               <div class="hide-sm">Time</div>
               <div>Venue</div>
               <div>Link</div>
+              <div>Actions</div>
             </div>
             <div id="admin-bookings-list" class="list-grid" style="margin-top: 6px;"></div>
             <p id="admin-empty" class="muted" style="display:none; margin-top: 8px;">No bookings yet.</p>
