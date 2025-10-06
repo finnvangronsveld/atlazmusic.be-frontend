@@ -16,26 +16,159 @@
 
     <style>
       /* Minimal form styling to match glass aesthetic without touching global CSS */
-      .admin-wrap { padding: 30px 20px 60px; }
-      .admin-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
-      .admin-header img { height: 28px; width: auto; }
+      /* Admin Layout */
+      .admin-wrap { 
+        padding: 20px; 
+        min-height: 100vh;
+      }
       
-      /* CRUD Action Buttons */
-      .actions-cell {
+      .container { 
+        max-width: 1200px; 
+        margin: 0 auto; 
+      }
+      
+      /* Header */
+      .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding: 20px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      
+      .admin-header img { 
+        height: 32px; 
+        width: auto; 
+      }
+      
+      .admin-header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+      }
+      
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+      }
+      
+      /* Events Container */
+      .events-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 30px;
+      }
+      
+      .events-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      
+      .events-header h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+      }
+      
+      .count-badge {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      
+      /* Events List */
+      .bookings-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .event-item {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s ease;
+      }
+      
+      .event-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-1px);
+      }
+      
+      .event-info {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 2fr 1fr;
+        gap: 20px;
+        align-items: center;
+      }
+      
+      .event-name {
+        font-weight: 600;
+        font-size: 16px;
+      }
+      
+      .event-date, .event-time, .event-venue {
+        font-size: 14px;
+        opacity: 0.8;
+      }
+      
+      .event-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-size: 18px;
+      }
+      
+      .event-actions {
         display: flex;
         gap: 8px;
-        align-items: center;
+        margin-left: 20px;
       }
       
       .btn-icon {
         background: rgba(255, 255, 255, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 6px;
-        padding: 6px 8px;
+        border-radius: 8px;
+        padding: 8px 16px;
         cursor: pointer;
-        font-size: 14px;
+        font-size: 13px;
+        font-weight: 500;
         transition: all 0.2s ease;
         color: white;
+        letter-spacing: 0.5px;
       }
       
       .btn-icon:hover {
@@ -54,9 +187,145 @@
         border-color: rgba(231, 76, 60, 0.5);
       }
       
+      /* Empty State */
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+      }
+      
+      .empty-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+      }
+      
+      .empty-state h3 {
+        margin: 0 0 8px 0;
+        font-size: 20px;
+        font-weight: 600;
+      }
+      
+      .empty-state p {
+        margin: 0;
+        opacity: 0.7;
+      }
+      
+      /* Modal Styles */
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .modal-backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+      }
+      
+      .modal-content {
+        position: relative;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px 24px 0 24px;
+        margin-bottom: 20px;
+      }
+      
+      .modal-header h3 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 600;
+      }
+      
+      .btn-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: background 0.2s ease;
+      }
+      
+      .btn-close:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      
+      .modal-form {
+        padding: 0 24px 24px 24px;
+      }
+      
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      
+      .field {
+        margin-bottom: 16px;
+      }
+      
+      .field label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+        font-size: 14px;
+      }
+      
+      .input {
+        width: 100%;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        color: white;
+        font-size: 14px;
+      }
+      
+      .input:focus {
+        outline: none;
+        border-color: rgba(102, 126, 234, 0.5);
+        background: rgba(255, 255, 255, 0.15);
+      }
+      
+      .modal-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 24px;
+      }
+      
       .btn-secondary {
         background: rgba(108, 117, 125, 0.2);
-        border-color: rgba(108, 117, 125, 0.3);
+        border: 1px solid rgba(108, 117, 125, 0.3);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
       }
       
       .btn-secondary:hover {
@@ -64,6 +333,13 @@
       }
       
       /* Alert styles */
+      .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid;
+      }
+      
       .alert-success {
         background: rgba(40, 167, 69, 0.2);
         border-color: rgba(40, 167, 69, 0.5);
@@ -80,6 +356,28 @@
         background: rgba(23, 162, 184, 0.2);
         border-color: rgba(23, 162, 184, 0.5);
         color: #d1ecf1;
+      }
+      
+      /* Responsive */
+      @media (max-width: 768px) {
+        .admin-header {
+          flex-direction: column;
+          gap: 16px;
+          text-align: center;
+        }
+        
+        .event-info {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+        
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+        
+        .modal-actions {
+          flex-direction: column;
+        }
       }
       .grid { display: grid; gap: 14px; }
       .grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -116,73 +414,93 @@
 
   <body>
     <main class="admin-wrap">
-      <div class="container small">
+      <div class="container">
+        <!-- Header with Add Button -->
         <div class="admin-header">
-          <a href="index.html" class="brand" aria-label="Back to site"><img src="scr/img/atlazmusicbeLOGO.png" alt="ATLAZ"></a>
-          <h1 style="margin:0">Admin — Bookings</h1>
+          <div class="header-left">
+            <a href="/" class="brand" aria-label="Back to site">
+              <img src="scr/img/atlazmusicbeLOGO.png" alt="ATLAZ">
+            </a>
+            <h1>Event Management</h1>
+          </div>
+          <button id="add-event-btn" class="btn btn-primary">
+            <i class="icon">+</i> Add Event
+          </button>
         </div>
 
-        <section class="section" style="padding: 0;">
-          <article class="card">
-            <h2 style="margin-top:0">Add a booking</h2>
-            <div id="admin-alert" class="alert" style="display:none"></div>
-            <form id="booking-form" class="grid" novalidate>
+        <!-- Alert Messages -->
+        <div id="admin-alert" class="alert" style="display:none"></div>
+
+        <!-- Events List -->
+        <div class="events-container">
+          <div class="events-header">
+            <h2>All Events</h2>
+            <span id="event-count" class="count-badge">Loading...</span>
+          </div>
+          
+          <div class="events-list">
+            <div id="admin-bookings-list" class="bookings-grid"></div>
+            <div id="admin-empty" class="empty-state" style="display:none">
+              <div class="empty-icon">□</div>
+              <h3>No events yet</h3>
+              <p>Click "Add Event" to create your first event</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal for Add/Edit Event -->
+        <div id="event-modal" class="modal" style="display:none">
+          <div class="modal-backdrop"></div>
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 id="modal-title">Add New Event</h3>
+              <button id="modal-close" class="btn-close">×</button>
+            </div>
+            
+            <form id="booking-form" class="modal-form" novalidate>
               <input type="hidden" id="edit-id" name="edit-id" />
-              <div class="grid cols-3">
+              
+              <div class="form-row">
                 <div class="field">
-                  <label for="date">Date</label>
+                  <label for="date">Date *</label>
                   <input id="date" name="date" class="input" type="date" required />
                 </div>
                 <div class="field">
-                  <label for="start">Start</label>
-                  <input id="start" name="start" class="input" type="time" placeholder="HH:mm" />
+                  <label for="start">Start Time</label>
+                  <input id="start" name="start" class="input" type="time" />
                 </div>
                 <div class="field">
-                  <label for="end">End</label>
-                  <input id="end" name="end" class="input" type="time" placeholder="HH:mm" />
+                  <label for="end">End Time</label>
+                  <input id="end" name="end" class="input" type="time" />
                 </div>
               </div>
-              <div class="grid cols-2">
+              
+              <div class="form-row">
                 <div class="field">
-                  <label for="name">Name</label>
+                  <label for="name">Event Name *</label>
                   <input id="name" name="name" class="input" type="text" placeholder="Event name" required />
                 </div>
                 <div class="field">
-                  <label for="venue">Venue</label>
+                  <label for="venue">Venue *</label>
                   <input id="venue" name="venue" class="input" type="text" placeholder="Venue, City" required />
                 </div>
               </div>
+              
               <div class="field">
-                <label for="link">Link</label>
-                <input id="link" name="link" class="input" type="url" placeholder="https://example.com/details" />
+                <label for="link">Event Link</label>
+                <input id="link" name="link" class="input" type="url" placeholder="https://example.com/event" />
               </div>
-              <div class="actions">
-                <button id="submit" type="submit" class="btn">Add booking</button>
-                <button id="cancel-edit" type="button" class="btn btn-secondary" style="display:none; margin-left: 8px;">Cancel Edit</button>
+              
+              <div class="modal-actions">
+                <button type="button" id="cancel-btn" class="btn btn-secondary">Cancel</button>
+                <button type="submit" id="submit-btn" class="btn btn-primary">Add Event</button>
               </div>
-              <p class="muted" style="margin: 8px 0 0">Note: This demo server stores data in-memory only. Restarting the API will reset the list.</p>
             </form>
-          </article>
-        </section>
-
-        <section class="section" style="padding-top: 24px;">
-          <article class="card">
-            <h2 style="margin-top:0">Current bookings</h2>
-            <div class="row header-row">
-              <div>Event</div>
-              <div>Date</div>
-              <div class="hide-sm">Time</div>
-              <div>Venue</div>
-              <div>Link</div>
-              <div>Actions</div>
-            </div>
-            <div id="admin-bookings-list" class="list-grid" style="margin-top: 6px;"></div>
-            <p id="admin-empty" class="muted" style="display:none; margin-top: 8px;">No bookings yet.</p>
-          </article>
-        </section>
+          </div>
+        </div>
       </div>
     </main>
 
-    <script src="admin.js?v=2" type="module"></script>
+    <script src="admin-clean.js"></script>
   </body>
   </html>
